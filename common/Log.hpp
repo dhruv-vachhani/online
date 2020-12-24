@@ -370,14 +370,15 @@ namespace Log
         }                                                                                          \
     } while (false)
 
-#define LOG_SYS(X)                                                                                 \
+#define LOG_SYS(ERRNO, X)                                                                          \
     do                                                                                             \
     {                                                                                              \
+        const auto onrre = ERRNO; /* Save errno immediately while avoiding name clashes*/          \
         auto& log_ = Log::logger();                                                                \
         if (!Log::isShutdownCalled() && log_.error())                                              \
         {                                                                                          \
             LOG_BODY_(log_, ERROR, "ERR",                                                          \
-                      X << " (" << Util::symbolicErrno(errno) << ": " << std::strerror(errno)      \
+                      X << " (" << Util::symbolicErrno(onrre) << ": " << std::strerror(onrre)      \
                         << ')',                                                                    \
                       true);                                                                       \
         }                                                                                          \
@@ -394,14 +395,15 @@ namespace Log
         }                                                                                          \
     } while (false)
 
-#define LOG_SFL(X)                                                                                 \
+#define LOG_SFL(ERRNO, X)                                                                          \
     do                                                                                             \
     {                                                                                              \
+        const auto onrre = ERRNO; /* Save errno immediately while avoiding name clashes*/          \
         auto& log_ = Log::logger();                                                                \
         if (!Log::isShutdownCalled() && log_.error())                                              \
         {                                                                                          \
             LOG_BODY_(log_, FATAL, "FTL",                                                          \
-                      X << " (" << Util::symbolicErrno(errno) << ": " << std::strerror(errno)      \
+                      X << " (" << Util::symbolicErrno(onrre) << ": " << std::strerror(onrre)      \
                         << ')',                                                                    \
                       true);                                                                       \
         }                                                                                          \

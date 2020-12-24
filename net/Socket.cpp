@@ -672,13 +672,14 @@ bool ServerSocket::bind(Type type, int port)
 
         int ipv6only = _type == Socket::Type::All ? 0 : 1;
         if (::setsockopt(getFD(), IPPROTO_IPV6, IPV6_V6ONLY, (char*)&ipv6only, sizeof(ipv6only)) == -1)
-            LOG_SYS("Failed set ipv6 socket to %d" << ipv6only);
+            LOG_SYS(errno, "Failed set ipv6 socket to %d" << ipv6only);
 
         rc = ::bind(getFD(), (const sockaddr *)&addrv6, sizeof(addrv6));
     }
 
     if (rc)
-        LOG_SYS("Failed to bind to: " << (_type == Socket::Type::IPv4 ? "IPv4" : "IPv6") << " port: " << port);
+        LOG_SYS(errno, "Failed to bind to: " << (_type == Socket::Type::IPv4 ? "IPv4" : "IPv6")
+                                             << " port: " << port);
 
     return rc == 0;
 #else
@@ -734,7 +735,7 @@ std::shared_ptr<Socket> ServerSocket::accept()
     }
     catch (const std::exception& ex)
     {
-        LOG_SYS("Failed to create client socket #" << rc << ". Error: " << ex.what());
+        LOG_ERR("Failed to create client socket #" << rc << ". Error: " << ex.what());
     }
 
     return nullptr;
@@ -835,7 +836,7 @@ std::shared_ptr<Socket> LocalServerSocket::accept()
     }
     catch (const std::exception& ex)
     {
-        LOG_SYS("Failed to create client socket #" << rc << ". Error: " << ex.what());
+        LOG_ERR("Failed to create client socket #" << rc << ". Error: " << ex.what());
         return std::shared_ptr<Socket>(nullptr);
     }
 }

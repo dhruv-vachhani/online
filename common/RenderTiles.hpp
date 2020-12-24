@@ -552,7 +552,7 @@ namespace RenderTiles
             int fd = open([[mmapFileURL path] UTF8String], O_RDWR|O_CREAT, 0666);
             if (fd == -1)
             {
-                LOG_SYS("Could not create file " << [[mmapFileURL path] UTF8String]);
+                LOG_SYS(errno, "Could not create file " << [[mmapFileURL path] UTF8String]);
                 return false;
             }
 
@@ -560,20 +560,20 @@ namespace RenderTiles
 
             if (lseek(fd, mmapFileSize-1, SEEK_SET) == -1)
             {
-                LOG_SYS("Could not seek in file " << [[mmapFileURL path] UTF8String]);
+                LOG_SYS(errno, "Could not seek in file " << [[mmapFileURL path] UTF8String]);
                 return false;
             }
 
             if (write(fd, "", 1) == -1)
             {
-                LOG_SYS("Could not write at end of " << [[mmapFileURL path] UTF8String]);
+                LOG_SYS(errno, "Could not write at end of " << [[mmapFileURL path] UTF8String]);
                 return false;
             }
 
             char *mmapMemory = (char *)mmap(NULL, mmapFileSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, fd, 0);
             if (mmapMemory == MAP_FAILED)
             {
-                LOG_SYS("Could not map in file " << [[mmapFileURL path] UTF8String]);
+                LOG_SYS(errno, "Could not map in file " << [[mmapFileURL path] UTF8String]);
                 close(fd);
                 return false;
             }
@@ -589,7 +589,7 @@ namespace RenderTiles
 
             if (munmap(mmapMemory, mmapFileSize) == -1)
             {
-                LOG_SYS("Could not unmap file " << [[mmapFileURL path] UTF8String]);
+                LOG_SYS(errno, "Could not unmap file " << [[mmapFileURL path] UTF8String]);
                 return false;
             }
 

@@ -656,7 +656,7 @@ public:
         } while (rc == -1 && errno == EINTR);
 
         if (rc == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
-            LOG_SYS("wakeup socket #" << fd << " is closed at wakeup?");
+            LOG_SYS(errno, "wakeup socket #" << fd << " is closed at wakeup?");
     }
 
     /// Wakeup the main polling loop in another thread
@@ -1179,16 +1179,20 @@ public:
         assert(!_outBuffer.empty());
         do
         {
-            ssize_t len;
+            ssize_t len = 0;
+            int last_errno = 0;
             do
             {
                 // Writing much more than we can absorb in the kernel causes wastage.
-                len = writeData(_outBuffer.getBlock(),
-                                std::min((int)_outBuffer.getBlockSize(),
-                                         getSendBufferSize()));
+                const auto size = std::min((int)_outBuffer.getBlockSize(), getSendBufferSize());
+                if (size == 0)
+                    break;
+
+                len = writeData(_outBuffer.getBlock(), size);
+                last_errno = errno; // Save right after the syscall.
 
                 LOG_TRC('#' << getFD() << ": Wrote outgoing data " << len << " bytes of "
-                            << _outBuffer.size() << " bytes buffered.");
+                            << _outBuffer.size() << " buffered bytes.");
 
 #ifdef LOG_SOCKET_DATA
                 auto& log = Log::logger();
@@ -1196,10 +1200,10 @@ public:
                     log.dump("", _outBuffer.getBlock(), len);
 #endif
 
-                if (len <= 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-                    LOG_SYS('#' << getFD() << ": Socket write returned " << len);
+                if (len <= 0 && last_errno != EAGAIN && last_errno != EWOULDBLOCK)
+                    LOG_SYS(last_errno, '#' << getFD() << ": Socket write returned " << len);
             }
-            while (len < 0 && errno == EINTR);
+            while (len < 0 && last_errno == EINTR);
 
             if (len > 0)
             {

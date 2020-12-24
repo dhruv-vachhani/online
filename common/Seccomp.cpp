@@ -276,14 +276,14 @@ void setRLimit(rlim_t confLim, int resource, const std::string &resourceText, co
          */
         rlimit rlim = { lim, lim };
         if (setrlimit(resource, &rlim) != 0)
-            LOG_SYS("Failed to set " << resourceText << " to " << limTextWithUnit << '.');
+            LOG_SYS(errno, "Failed to set " << resourceText << " to " << limTextWithUnit << '.');
         if (getrlimit(resource, &rlim) == 0)
         {
             const std::string setLimTextWithUnit((rlim.rlim_max == RLIM_INFINITY) ? "unlimited" : std::to_string(rlim.rlim_max) + ' ' + unitText);
             LOG_INF(resourceText << " is " << setLimTextWithUnit << " after setting it to " << limTextWithUnit << '.');
         }
         else
-            LOG_SYS("Failed to get " << resourceText << '.');
+            LOG_SYS(errno, "Failed to get " << resourceText << '.');
     }
     else
         LOG_INF("Ignored setting " << resourceText << " to " << limTextWithUnit << '.');

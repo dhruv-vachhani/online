@@ -158,7 +158,7 @@ namespace FileUtil
             oss << "Error while copying from " << anonymizeUrl(fromPath) << " to "
                 << anonymizeUrl(toPath) << ": " << ex.what();
             const std::string err = oss.str();
-            LOG_SYS(err);
+            LOG_ERR(err);
             close(from);
             close(to);
             unlink(toPath.c_str());
@@ -201,7 +201,7 @@ namespace FileUtil
         std::string newTmp = root + "/lool-" + Util::rng::getFilename(16);
         if (::mkdir(newTmp.c_str(), S_IRWXU) < 0)
         {
-            LOG_SYS("Failed to create random temp directory [" << newTmp << ']');
+            LOG_SYS(errno, "Failed to create random temp directory [" << newTmp << ']');
             return root;
         }
         return newTmp;
@@ -295,7 +295,7 @@ namespace FileUtil
             return real;
         }
 
-        LOG_SYS("Failed to get the realpath of [" << path << ']');
+        LOG_SYS(errno, "Failed to get the realpath of [" << path << ']');
         return path;
     }
 
@@ -344,7 +344,7 @@ namespace FileUtil
                           };
         if (utimes(filename.c_str(), timestamps) != 0)
         {
-            LOG_SYS("Failed to update the timestamp of [" << filename << ']');
+            LOG_SYS(errno, "Failed to update the timestamp of [" << filename << ']');
             return false;
         }
 
@@ -372,8 +372,8 @@ namespace FileUtil
             if (rename(randFilename.c_str(), toPath.c_str()) == 0)
                 return true;
 
-            LOG_SYS("Failed to copy [" << fromPath << "] -> [" << toPath
-                                       << "] while atomically renaming:");
+            LOG_SYS(errno, "Failed to copy [" << fromPath << "] -> [" << toPath
+                                              << "] while atomically renaming:");
             removeFile(randFilename, false); // Cleanup.
         }
 

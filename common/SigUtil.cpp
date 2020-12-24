@@ -272,7 +272,7 @@ namespace SigUtil
             backtrace_symbols_fd(backtraceBuffer, numSlots, STDERR_FILENO);
         }
 #else
-        LOG_SYS("Backtrace not available on Android.");
+        LOG_INF("Backtrace not available on Android.");
 #endif
 
         if (std::getenv("LOOL_DEBUG"))
@@ -361,7 +361,7 @@ namespace SigUtil
             return true;
         }
 
-        LOG_SYS("Error when trying to kill PID: " << pid << ". Will wait for termination.");
+        LOG_SYS(errno, "Error when trying to kill PID: " << pid << ". Will wait for termination.");
 
         const int sleepMs = 50;
         const int count = std::max(CHILD_REBALANCE_INTERVAL_MS / sleepMs, 2);

@@ -245,7 +245,8 @@ void setupJailDevNodes(const std::string& root)
                   makedev(1, 8))
             != 0)
         {
-            LOG_SYS("mknod(" << root << "/dev/random) failed. Mount must not use nodev flag.");
+            LOG_SYS(errno,
+                    "mknod(" << root << "/dev/random) failed. Mount must not use nodev flag.");
         }
     }
 
@@ -257,7 +258,8 @@ void setupJailDevNodes(const std::string& root)
                   makedev(1, 9))
             != 0)
         {
-            LOG_SYS("mknod(" << root << "/dev/urandom) failed. Mount must not use nodev flag.");
+            LOG_SYS(errno,
+                    "mknod(" << root << "/dev/urandom) failed. Mount must not use nodev flag.");
         }
     }
 }
@@ -463,7 +465,7 @@ void setupRandomDeviceLink(const std::string& sysTemplate, const std::string& na
     }
 
     if (symlink(target.c_str(), linkpath.c_str()) == -1)
-        LOG_SYS("Failed to symlink(\"" << target << "\", \"" << linkpath << "\")");
+        LOG_SYS(errno, "Failed to symlink(\"" << target << "\", \"" << linkpath << "\")");
 }
 
 // The random devices are setup in two stages.

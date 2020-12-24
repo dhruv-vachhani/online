@@ -514,7 +514,7 @@ void FileServerRequestHandler::readDirToHash(const std::string &basePath, const 
     DIR* workingdir = opendir((basePath + path).c_str());
     if (!workingdir)
     {
-        LOG_SYS("Failed to open directory [" << basePath + path << ']');
+        LOG_SYS(errno, "Failed to open directory [" << basePath + path << ']');
         return;
     }
 

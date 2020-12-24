@@ -535,7 +535,7 @@ static IMP standardImpOfInputAccessoryView = nil;
             assert([messageBodyItems count] == 2);
             NSURL *tile = [NSURL URLWithString:messageBodyItems[1]];
             if (unlink([[tile path] UTF8String]) == -1) {
-                LOG_SYS("Could not unlink tile " << [[tile path] UTF8String]);
+                LOG_SYS(errno, "Could not unlink tile " << [[tile path] UTF8String]);
             }
             return;
         }

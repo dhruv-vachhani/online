@@ -554,18 +554,17 @@ namespace Util
         ThreadName[sizeof(ThreadName) - 1] = '\0';
 #ifdef __linux__
         if (prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(s.c_str()), 0, 0, 0) != 0)
-            LOG_SYS("Cannot set thread name of "
-                    << getThreadId() << " (" << std::hex << std::this_thread::get_id() << std::dec
-                    << ") of process " << getpid() << " currently " << knownAs << " to [" << s
-                    << "].");
+            LOG_SYS(errno, "Cannot set thread name of "
+                               << getThreadId() << " (" << std::hex << std::this_thread::get_id()
+                               << std::dec << ") of process " << getpid() << " currently "
+                               << knownAs << " to [" << s << ']');
         else
             LOG_INF("Thread " << getThreadId() << " (" << std::hex << std::this_thread::get_id()
                               << std::dec << ") of process " << getpid() << " formerly " << knownAs
-                              << " is now called [" << s << "].");
+                              << " is now called [" << s << ']');
 #elif defined IOS
         [[NSThread currentThread] setName:[NSString stringWithUTF8String:ThreadName]];
-        LOG_INF("Thread " << getThreadId() <<
-                ") is now called [" << s << "].");
+        LOG_INF("Thread " << getThreadId() << ") is now called [" << s << ']');
 #endif
     }
 

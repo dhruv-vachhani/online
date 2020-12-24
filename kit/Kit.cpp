@@ -297,7 +297,7 @@ namespace
                 struct stat st;
                 if (stat(fpath, &st) == -1)
                 {
-                    LOG_SYS("nftw: stat(\"" << fpath << "\") failed");
+                    LOG_SYS(errno, "nftw: stat(\"" << fpath << "\") failed");
                     return FTW_STOP;
                 }
                 if (!shouldCopyDir(relativeOldPath))
@@ -311,7 +311,7 @@ namespace
                 ut.modtime = st.st_mtime;
                 if (utime(newPath.toString().c_str(), &ut) == -1)
                 {
-                    LOG_SYS("nftw: utime(\"" << newPath.toString() << "\") failed");
+                    LOG_SYS(errno, "nftw: utime(\"" << newPath.toString() << "\") failed");
                     return FTW_STOP;
                 }
             }
@@ -323,7 +323,7 @@ namespace
                 const ssize_t written = readlink(fpath, target, size);
                 if (written <= 0 || static_cast<std::size_t>(written) > size)
                 {
-                    LOG_SYS("nftw: readlink(\"" << fpath << "\") failed");
+                    LOG_SYS(errno, "nftw: readlink(\"" << fpath << "\") failed");
                     Log::shutdown();
                     std::_Exit(EX_SOFTWARE);
                 }
@@ -332,8 +332,8 @@ namespace
                 File(newPath.parent()).createDirectories();
                 if (symlink(target, newPath.toString().c_str()) == -1)
                 {
-                    LOG_SYS("nftw: symlink(\"" << target << "\", \"" << newPath.toString()
-                                               << "\") failed");
+                    LOG_SYS(errno, "nftw: symlink(\"" << target << "\", \"" << newPath.toString()
+                                                      << "\") failed");
                     return FTW_STOP;
                 }
             }
@@ -378,7 +378,7 @@ namespace
 
         if (nftw(source.c_str(), linkOrCopyFunction, 10, FTW_ACTIONRETVAL|FTW_PHYS) == -1)
         {
-            LOG_SYS("linkOrCopy: nftw() failed for '" << source << '\'');
+            LOG_SYS(errno, "linkOrCopy: nftw() failed for '" << source << '\'');
         }
 
         if (linkOrCopyVerboseLogging)
@@ -404,7 +404,7 @@ namespace
         caps = cap_get_proc();
         if (caps == nullptr)
         {
-            LOG_SFL("cap_get_proc() failed.");
+            LOG_SFL(errno, "cap_get_proc() failed");
             Log::shutdown();
             std::_Exit(1);
         }
@@ -416,14 +416,14 @@ namespace
         if (cap_set_flag(caps, CAP_EFFECTIVE, sizeof(cap_list)/sizeof(cap_list[0]), cap_list, CAP_CLEAR) == -1 ||
             cap_set_flag(caps, CAP_PERMITTED, sizeof(cap_list)/sizeof(cap_list[0]), cap_list, CAP_CLEAR) == -1)
         {
-            LOG_SFL("cap_set_flag() failed.");
+            LOG_SFL(errno, "cap_set_flag() failed");
             Log::shutdown();
             std::_Exit(1);
         }
 
         if (cap_set_proc(caps) == -1)
         {
-            LOG_SFL("cap_set_proc() failed.");
+            LOG_SFL(errno, "cap_set_proc() failed");
             Log::shutdown();
             std::_Exit(1);
         }
@@ -2270,19 +2270,19 @@ void lokit_main(
 
             ProcSMapsFile = open("/proc/self/smaps", O_RDONLY);
             if (ProcSMapsFile < 0)
-                LOG_SYS("Failed to open /proc/self/smaps. Memory stats will be missing.");
+                LOG_SYS(errno, "Failed to open /proc/self/smaps. Memory stats will be missing.");
 
             LOG_INF("chroot(\"" << jailPathStr << "\")");
             if (chroot(jailPathStr.c_str()) == -1)
             {
-                LOG_SFL("chroot(\"" << jailPathStr << "\") failed.");
+                LOG_SFL(errno, "chroot(\"" << jailPathStr << "\") failed");
                 Log::shutdown();
                 std::_Exit(EX_SOFTWARE);
             }
 
             if (chdir("/") == -1)
             {
-                LOG_SFL("chdir(\"/\") in jail failed.");
+                LOG_SFL(errno, "chdir(\"/\") in jail failed");
                 Log::shutdown();
                 std::_Exit(EX_SOFTWARE);
             }
@@ -2356,22 +2356,22 @@ void lokit_main(
         if (getrlimit(RLIMIT_AS, &rlim) == 0)
             LOG_INF("RLIMIT_AS is " << Util::getHumanizedBytes(rlim.rlim_max) << " (" << rlim.rlim_max << " bytes)");
         else
-            LOG_SYS("Failed to get RLIMIT_AS.");
+            LOG_SYS(errno, "Failed to get RLIMIT_AS");
 
         if (getrlimit(RLIMIT_STACK, &rlim) == 0)
             LOG_INF("RLIMIT_STACK is " << Util::getHumanizedBytes(rlim.rlim_max) << " (" << rlim.rlim_max << " bytes)");
         else
-            LOG_SYS("Failed to get RLIMIT_STACK.");
+            LOG_SYS(errno, "Failed to get RLIMIT_STACK");
 
         if (getrlimit(RLIMIT_FSIZE, &rlim) == 0)
             LOG_INF("RLIMIT_FSIZE is " << Util::getHumanizedBytes(rlim.rlim_max) << " (" << rlim.rlim_max << " bytes)");
         else
-            LOG_SYS("Failed to get RLIMIT_FSIZE.");
+            LOG_SYS(errno, "Failed to get RLIMIT_FSIZE");
 
         if (getrlimit(RLIMIT_NOFILE, &rlim) == 0)
             LOG_INF("RLIMIT_NOFILE is " << rlim.rlim_max << " files.");
         else
-            LOG_SYS("Failed to get RLIMIT_NOFILE.");
+            LOG_SYS(errno, "Failed to get RLIMIT_NOFILE");
 
         LOG_INF("Kit process for Jail [" << jailId << "] is ready.");
 
